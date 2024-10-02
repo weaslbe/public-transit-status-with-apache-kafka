@@ -1,6 +1,10 @@
 # Public Transit Status with Apache Kafka
-
-In this project, you will construct a streaming event pipeline around Apache Kafka and its ecosystem. Using public data from the [Chicago Transit Authority](https://www.transitchicago.com/data/) we will construct an event pipeline around Kafka that allows us to simulate and display the status of train lines in real time.
+This project is part of the Data Streaming Nanodegree Program on [Udacity](https://www.udacity.com/enrollment/nd029).
+It is about using REST Proxy, Kafka Connect, KSQL and Faust Python Stream Processing to stream public transit statuses
+using Kafka and the Kafka ecosystem to build a stream processing application that shows real-time train statuses.
+Other concepts used are Apache Avro for Data Schemas.
+- - - 
+In this project, one will construct a streaming event pipeline around Apache Kafka and its ecosystem. Using public data from the [Chicago Transit Authority](https://www.transitchicago.com/data/) we will construct an event pipeline around Kafka that allows us to simulate and display the status of train lines in real time.
 
 When the project is complete, you will be able to monitor a website to watch trains move from station to station.
 
@@ -11,9 +15,11 @@ When the project is complete, you will be able to monitor a website to watch tra
 
 The following are required to complete this project:
 
-* Docker
-* Python 3.7
-* Access to a computer with a minimum of 16gb+ RAM and a 4-core CPU to execute the simulation
+* Docker and docker compose
+* Python 3.8 (tested successfully)
+* successfully tested on macOS Sonoma 14.5 with Docker image by running: `docker compose up` and enabling and 
+installing rosetta for emulation of docker images
+* Access to a computer with a minimum of 16GB+ RAM and a 4-Core CPU to execute the simulation
 
 ## Description
 
@@ -58,7 +64,7 @@ To accomplish this, you must complete the following tasks:
 1. Define a `value` schema for the weather event in `producers/models/schemas/weather_value.json` with the following attributes
 	* `temperature`
 	* `status`
-1. Complete the code in `producers/models/weather.py` so that:
+2. Complete the code in `producers/models/weather.py` so that:
 	* A topic is created for weather events
 	* The weather model emits `weather` event to Kafka REST Proxy whenever the `Weather.run()` function is called.
 		* **NOTE**: When sending HTTP requests to Kafka REST Proxy, be careful to include the correct `Content-Type`. Pay close attention to the [examples in the documentation](https://docs.confluent.io/current/kafka-rest/api.html#post--topics-(string-topic_name)) for more information.
@@ -69,7 +75,7 @@ Finally, we need to extract station information from our PostgreSQL database int
 
 To accomplish this, you must complete the following tasks:
 
-1. Complete the code and configuration in `producers/connectors.py`
+1. Complete the code and configuration in `producers/connector.py`
 	* Please refer to the [Kafka Connect JDBC Source Connector Configuration Options](https://docs.confluent.io/current/connect/kafka-connect-jdbc/source-connector/source_config_options.html) for documentation on the options you must complete.
 	* You can run this file directly to test your connector, rather than running the entire simulation.
 	* Make sure to use the [Landoop Kafka Connect UI](http://localhost:8084) and [Landoop Kafka Topics UI](http://localhost:8085) to check the status and output of the Connector.
@@ -80,7 +86,7 @@ We will leverage Faust Stream Processing to transform the raw Stations table tha
 
 To accomplish this, you must complete the following tasks:
 
-1. Complete the code and configuration in `consumers/faust_stream.py
+1. Complete the code and configuration in `consumers/faust_stream.py`
 
 #### Watch Out!
 
@@ -167,7 +173,11 @@ The following directory layout indicates the files that the student is responsib
 
 To run the simulation, you must first start up the Kafka ecosystem on their machine utilizing Docker Compose.
 
-```%> docker-compose up```
+- ```docker compose up``` starts the container
+- ```docker compose stop``` stops the container
+- ```docker compose -rm v``` removes the container volumes
+
+
 
 Docker compose will take a 3-5 minutes to start, depending on your hardware. Please be patient and wait for the docker-compose logs to slow down or stop before beginning the simulation.
 
@@ -196,38 +206,33 @@ There are two pieces to the simulation, the `producer` and `consumer`. As you de
 
 However, when you are ready to verify the end-to-end system prior to submission, it is critical that you open a terminal window for each piece and run them at the same time. **If you do not run both the producer and consumer at the same time you will not be able to successfully complete the project**.
 
-#### To run the `producer`:
+1. `python3.8 -m venv venv`
+2. `source venv/bin/activate`
+3. `pip install -r requirements.txt`
 
-1. `cd producers`
-2. `virtualenv venv`
-3. `. venv/bin/activate`
-4. `pip install -r requirements.txt`
-5. `python simulation.py`
+#### To run the `producer`, open Terminal 1:
+
+1. `source venv/bin/activate`
+2. `cd producers`
+3. `python simulation.py`
 
 Once the simulation is running, you may hit `Ctrl+C` at any time to exit.
 
-#### To run the Faust Stream Processing Application:
-1. `cd consumers`
-2. `virtualenv venv`
-3. `. venv/bin/activate`
-4. `pip install -r requirements.txt`
-5. `faust -A faust_stream worker -l info`
+#### To run the Faust Stream Processing Application, open Terminal 2:
+1. `source venv/bin/activate`
+2. `cd consumers`
+3. `faust -A faust_stream worker -l info`
 
+#### To run the KSQL Creation Script, open Terminal 3:
+1. `source venv/bin/activate`
+2. `cd consumers`
+3. `python ksql.py`
 
-#### To run the KSQL Creation Script:
-1. `cd consumers`
-2. `virtualenv venv`
-3. `. venv/bin/activate`
-4. `pip install -r requirements.txt`
-5. `python ksql.py`
+#### To run the `consumer`, open Terminal 4:
 
-#### To run the `consumer`:
-
-** NOTE **: Do not run the consumer until you have reached Step 6!
-1. `cd consumers`
-2. `virtualenv venv`
-3. `. venv/bin/activate`
-4. `pip install -r requirements.txt`
-5. `python server.py`
+** NOTE **: Do not run the consumer until you have reached the previous steps!
+1. `source venv/bin/activate`
+2. `cd consumers`
+3. `python server.py`
 
 Once the server is running, you may hit `Ctrl+C` at any time to exit.

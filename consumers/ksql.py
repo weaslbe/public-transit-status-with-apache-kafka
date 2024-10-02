@@ -12,25 +12,31 @@ logger = logging.getLogger(__name__)
 
 KSQL_URL = "http://localhost:8088"
 
-#
-# TODO: Complete the following KSQL statements.
-# TODO: For the first statement, create a `turnstile` table from your turnstile topic.
-#       Make sure to use 'avro' datatype!
-# TODO: For the second statment, create a `turnstile_summary` table by selecting from the
-#       `turnstile` table and grouping on station_id.
-#       Make sure to cast the COUNT of station id to `count`
-#       Make sure to set the value format to JSON
+# delete table: DROP TABLE <your_table>
+# terminate a running query in ksql CLI: TERMINATE <query_name>
 
+# aggregate turnstile data for each of our stations using KSQL.
+# When producing turnstile data, we simply emitted an event, not a count.
+# It would be more useful to summarize it by station so that downstream applications always have an up-to-date count.
+
+# https://docs.ksqldb.io/en/latest/how-to-guides/convert-changelog-to-table/
+# https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-table/
 KSQL_STATEMENT = """
 CREATE TABLE turnstile (
-    ???
+    station_id INT,
+    station_name VARCHAR,
+    line VARCHAR
 ) WITH (
-    ???
+    kafka_topic='org.chicago.cta.turnstile.v1',
+    value_format='avro',
+    key='station_id'
 );
 
 CREATE TABLE turnstile_summary
-WITH (???) AS
-    ???
+WITH (value_format='json') AS
+SELECT station_id, COUNT(station_id) AS count
+FROM turnstile
+GROUP BY station_id;
 """
 
 

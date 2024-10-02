@@ -1,0 +1,6 @@
+confluent-kafka[avro]
+faust
+tornado
+pandas
+requests
+python-dotenv

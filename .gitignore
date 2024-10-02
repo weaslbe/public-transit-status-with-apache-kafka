@@ -28,5 +28,4 @@ requirements_test.txt.bak
 
 # CI Build specifics
 test-reports/*
-docker_build/oauth/Airflow-Users-List.md
-poim-airflow-dag-RELEASE/*
+docker_build/*

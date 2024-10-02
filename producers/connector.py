@@ -4,12 +4,12 @@ import logging
 
 import requests
 
-
 logger = logging.getLogger(__name__)
-
 
 KAFKA_CONNECT_URL = "http://localhost:8083/connectors"
 CONNECTOR_NAME = "stations"
+POSTGRES_HOST_URL = "jdbc:postgresql://postgres:5432/cta"  # from Readme
+
 
 def configure_connector():
     """Starts and configures the Kafka Connect connector"""
@@ -20,54 +20,36 @@ def configure_connector():
         logging.debug("connector already created skipping recreation")
         return
 
-    # TODO: Complete the Kafka Connect Config below.
-    # Directions: Use the JDBC Source Connector to connect to Postgres. Load the `stations` table
-    # using incrementing mode, with `stop_id` as the incrementing column name.
-    # Make sure to think about what an appropriate topic prefix would be, and how frequently Kafka
-    # Connect should run this connector (hint: not very often!)
-        return
+    # extract station information from PostgreSQL database into Kafka using Kafka JDBC Source Connector
+    # see https://docs.confluent.io/kafka-connectors/jdbc/current/source-connector/source_config_options.html
+    # To delete a misconfigured connector: CURL -X DELETE localhost:8083/connectors/stations
+    resp = requests.post(
+       KAFKA_CONNECT_URL,
+       headers={"Content-Type": "application/json"},
+       data=json.dumps({
+           "name": CONNECTOR_NAME,
+           "config": {
+               "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+               "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+               "key.converter.schemas.enable": "false",
+               "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+               "value.converter.schemas.enable": "false",
+               "batch.max.rows": "500",
+               "connection.url": POSTGRES_HOST_URL,
+               "connection.user": "cta_admin",  # readme
+               "connection.password": "chicago",  # readme
+               "table.whitelist": CONNECTOR_NAME,
+               "mode": "incrementing",
+               "incrementing.column.name": "stop_id",
+               "topic.prefix": "org.chicago.cta.",
+               "poll.interval.ms": 1000 * 60,  # every 60 seconds
+           }
+       }),
+    )
 
-    # TODO: Complete the Kafka Connect Config below.
-    # Directions: Use the JDBC Source Connector to connect to Postgres. Load the `stations` table
-    # using incrementing mode, with `stop_id` as the incrementing column name.
-    # Make sure to think about what an appropriate topic prefix would be, and how frequently Kafka
-    # Connect should run this connector (hint: not very often!)
-    logger.info("connector code not completed skipping connector creation")
-    #resp = requests.post(
-    #    KAFKA_CONNECT_URL,
-    #    headers={"Content-Type": "application/json"},
-    #    data=json.dumps({
-    #        "name": CONNECTOR_NAME,
-    #        "config": {
-    #            "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
-    #            "key.converter": "org.apache.kafka.connect.json.JsonConverter",
-    #            "key.converter.schemas.enable": "false",
-    #            "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-    #            "value.converter.schemas.enable": "false",
-    #            "batch.max.rows": "500",
-    #            # TODO
-    #            "connection.url": "",
-    #            # TODO
-    #            "connection.user": "",
-    #            # TODO
-    #            "connection.password": "",
-    #            # TODO
-    #            "table.whitelist": "",
-    #            # TODO
-    #            "mode": "",
-    #            # TODO
-    #            "incrementing.column.name": "",
-    #            # TODO
-    #            "topic.prefix": "",
-    #            # TODO
-    #            "poll.interval.ms": "",
-    #        }
-    #    }),
-    #)
-
-    ## Ensure a healthy response was given
-    #resp.raise_for_status()
-    #logging.debug("connector created successfully")
+    # Ensure a healthy response was given
+    resp.raise_for_status()
+    logging.debug("connector created successfully")
 
 
 if __name__ == "__main__":
