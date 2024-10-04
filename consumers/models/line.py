@@ -65,7 +65,7 @@ class Line:
                 self._handle_station(value)
             except Exception as e:
                 logger.fatal("bad station? %s, %s", value, e)
-        elif topic_name == "org.chicago.cta.station.arrivals.v1":  # arrival topic
+        elif topic_name.startswith("org.chicago.cta.station.arrivals."):  # arrival topic
             self._handle_arrival(message)
         elif topic_name == "TURNSTILE_SUMMARY":  # KSQL Turnstile Summary Topic
             json_data = json.loads(message.value())

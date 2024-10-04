@@ -40,9 +40,8 @@ class KafkaConsumer:
         self.broker_properties = {
             "bootstrap.servers": BROKER_URL,  # from API spec
             # When using Avro with Kafka, the producer must define an Avro Schema for messages they produce
-            "group.id": f"{self.topic_name_pattern}",  # "0",
-            # "auto.offset.reset": "earliest" if offset_earliest else "latest",
-            # 'default.topic.config': {'auto.offset.reset': 'earliest'}
+            "group.id": f"{self.topic_name_pattern}",
+            "auto.offset.reset": "earliest" if offset_earliest else "latest",
         }
 
         if is_avro is True:

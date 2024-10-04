@@ -236,3 +236,4 @@ Once the simulation is running, you may hit `Ctrl+C` at any time to exit.
 3. `python server.py`
 
 Once the server is running, you may hit `Ctrl+C` at any time to exit.
+Open a web browser to http://localhost:8888 to see the Transit Status Page
